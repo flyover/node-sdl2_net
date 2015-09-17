@@ -26,11 +26,6 @@
 
 #include "node-sdl2_net.h"
 
-#include <v8.h>
-#include <node.h>
-#include <SDL.h>
-#include <SDL_net.h>
-
 #if defined(__ANDROID__)
 #include <android/log.h>
 #define printf(...) __android_log_print(ANDROID_LOG_INFO, "printf", __VA_ARGS__)
@@ -38,70 +33,51 @@
 
 #define countof(_a) (sizeof(_a)/sizeof((_a)[0]))
 
-using namespace v8;
-
 namespace node_sdl2_net {
 
-MODULE_EXPORT_IMPLEMENT_TODO(SDLNet_LinkedVersion)
+NANX_EXPORT(SDLNet_LinkedVersion) { Nan::ThrowError("TODO"); }
 
-MODULE_EXPORT_IMPLEMENT(SDLNet_Init)
+NANX_EXPORT(SDLNet_Init)
 {
-	NanScope();
 	int err = SDLNet_Init();
 	if (err < 0)
 	{
 		printf("SDLNet_Init error: %d\n", err);
 	}
-	NanReturnValue(NanNew<Integer>(err));
+	info.GetReturnValue().Set(Nan::New(err));
 }
 
-MODULE_EXPORT_IMPLEMENT(SDLNet_Quit)
+NANX_EXPORT(SDLNet_Quit)
 {
-	NanScope();
 	SDLNet_Quit();
-	NanReturnUndefined();
 }
 
-MODULE_EXPORT_IMPLEMENT(SDLNet_GetError)
+NANX_EXPORT(SDLNet_GetError)
 {
-	NanScope();
 	const char* sdl_net_error = SDLNet_GetError();
-	NanReturnValue(NanNew<String>(sdl_net_error));
+	info.GetReturnValue().Set(NANX_STRING(sdl_net_error));
 }
 
-MODULE_EXPORT_IMPLEMENT(SDLNet_ClearError)
+NANX_EXPORT(SDLNet_ClearError)
 {
-	NanScope();
 	SDL_ClearError();
-	NanReturnUndefined();
 }
 
-#if NODE_VERSION_AT_LEAST(0,11,0)
-void init(Handle<Object> exports, Handle<Value> module, Handle<Context> context)
-#else
-void init(Handle<Object> exports/*, Handle<Value> module*/)
-#endif
+NAN_MODULE_INIT(init)
 {
-	NanScope();
-
 	// SDL_net.h
 
-	MODULE_CONSTANT(exports, SDL_NET_MAJOR_VERSION);
-	MODULE_CONSTANT(exports, SDL_NET_MINOR_VERSION);
-	MODULE_CONSTANT(exports, SDL_NET_PATCHLEVEL);
+	NANX_CONSTANT(target, SDL_NET_MAJOR_VERSION);
+	NANX_CONSTANT(target, SDL_NET_MINOR_VERSION);
+	NANX_CONSTANT(target, SDL_NET_PATCHLEVEL);
 
-	MODULE_EXPORT_APPLY(exports, SDLNet_LinkedVersion);
-	MODULE_EXPORT_APPLY(exports, SDLNet_Init);
-	MODULE_EXPORT_APPLY(exports, SDLNet_Quit);
-	MODULE_EXPORT_APPLY(exports, SDLNet_GetError);
-	MODULE_EXPORT_APPLY(exports, SDLNet_ClearError);
+	NANX_EXPORT_APPLY(target, SDLNet_LinkedVersion);
+	NANX_EXPORT_APPLY(target, SDLNet_Init);
+	NANX_EXPORT_APPLY(target, SDLNet_Quit);
+	NANX_EXPORT_APPLY(target, SDLNet_GetError);
+	NANX_EXPORT_APPLY(target, SDLNet_ClearError);
 }
 
 } // namespace node_sdl2_net
 
-#if NODE_VERSION_AT_LEAST(0,11,0)
-NODE_MODULE_CONTEXT_AWARE_BUILTIN(node_sdl2_net, node_sdl2_net::init)
-#else
 NODE_MODULE(node_sdl2_net, node_sdl2_net::init)
-#endif
-
