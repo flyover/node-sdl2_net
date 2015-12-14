@@ -24,11 +24,38 @@
  * SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE. 
  */
 
-var sdl2_net = null;
-try { sdl2_net = sdl2_net || require('./build/Release/node-sdl2_net.node'); } catch (err) {}
-try { sdl2_net = sdl2_net || process._linkedBinding('node_sdl2_net'); } catch (err) {}
-try { sdl2_net = sdl2_net || process.binding('node_sdl2_net'); } catch (err) {}
-module.exports = sdl2_net;
+var node_sdl2_net = null;
+try { node_sdl2_net = node_sdl2_net || require('./build/Release/node-sdl2_net.node'); } catch (err) {}
+try { node_sdl2_net = node_sdl2_net || process._linkedBinding('node_sdl2_net'); } catch (err) {}
+try { node_sdl2_net = node_sdl2_net || process.binding('node_sdl2_net'); } catch (err) {}
+module.exports = node_sdl2_net;
 
-sdl2_net.version = sdl2_net.version || sdl2_net.SDL_NET_MAJOR_VERSION + "." + sdl2_net.SDL_NET_MINOR_VERSION + "." + sdl2_net.SDL_NET_PATCHLEVEL;
+node_sdl2_net.version = node_sdl2_net.version || node_sdl2_net.SDL_NET_MAJOR_VERSION + "." + node_sdl2_net.SDL_NET_MINOR_VERSION + "." + node_sdl2_net.SDL_NET_PATCHLEVEL;
 
+node_sdl2_net.SDLNet_CheckError = node_sdl2_net.SDLNet_CheckError || function ()
+{
+	var error = node_sdl2_net.SDLNet_GetError(); node_sdl2_net.SDLNet_ClearError();
+	if (error) { console.error("SDL_net", error); }
+	return error;
+};
+
+/// var node_sdl2_net = require('@flyover/node-sdl2_net');
+/// var sdl_net = node_sdl2_net.SDLNet();
+/// node_sdl2_net.SDLNet_* -> sdl_net.*
+node_sdl2_net.SDLNet = function (out) {
+	out = out || {};
+	var re = /^(SDLNet_)(.*)/;
+	for (var key in node_sdl2_net) {
+		var match = key.match(re);
+		if (match && match[2]) {
+			console.log(key, match[2]);
+			out[match[2]] = node_sdl2_net[key];
+		} else {
+			//console.log("!!!", key);
+			out[key] = node_sdl2_net[key];
+		}
+	}
+	return out;
+}
+
+//node_sdl2_net.SDLNet();
